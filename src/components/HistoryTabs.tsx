@@ -158,13 +158,18 @@ export default function HistoryTabs() {
                         {historyData.map((item) => (
                             <div
                                 key={item.id}
-                                className="py-4 px-6 text-center"
+                                className="py-4 px-6 flex items-center gap-4 text-left"
                             >
-                                <div className="font-bold text-gray-800 text-[15px] mb-1">
-                                    {item.description}
-                                </div>
-                                <div className="text-gray-400 text-[12px] font-light">
-                                    {item.subtext}
+                                {/* Avatar */}
+                                <div className="w-10.5 h-10.5 rounded-full bg-linear-to-b from-brand-orange-avatar to-brand-red-dark shrink-0"></div>
+
+                                <div>
+                                    <div className="font-bold text-gray-800 text-[15px] mb-0.5">
+                                        {item.description}
+                                    </div>
+                                    <div className="text-gray-400 text-[12px] font-light">
+                                        {item.subtext}
+                                    </div>
                                 </div>
                             </div>
                         ))}
