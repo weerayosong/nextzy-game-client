@@ -1,13 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-
-// กำหนดรูปร่างของข้อมูลผู้เล่น
-type User = {
-    id: string;
-    nickname: string;
-    totalPoints: number;
-};
+import { User } from "@/types";
 
 type GameContextType = {
     user: User | null;

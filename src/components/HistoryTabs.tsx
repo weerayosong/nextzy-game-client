@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useGame } from "@/contexts/GameContext";
-
-// กำหนด Type ชั่วคราว (เดี๋ยวค่อยย้ายไปโฟลเดอร์ types ตอน Refactor)
-type TabType = "GLOBAL" | "PERSONAL" | "REWARD";
+import { TabType, HistoryResponseItem } from "@/types";
 
 type HistoryItem = {
     id: string;
@@ -52,13 +50,7 @@ export default function HistoryTabs() {
                     // *** ตรงนี้อาจจะต้องปรับการ map ข้อมูลให้ตรงกับ Schema ของ NestJS ***
 
                     const formattedData = result.data.map(
-                        (item: {
-                            id: string;
-                            checkpoint?: number;
-                            pointsReceived?: number;
-                            createdAt: string;
-                            user?: { nickname: string };
-                        }) => ({
+                        (item: HistoryResponseItem) => ({
                             id: item.id,
                             description:
                                 activeTab === "REWARD"
