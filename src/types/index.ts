@@ -13,6 +13,7 @@ export type HistoryResponseItem = {
     id: string;
     checkpoint?: number;
     pointsReceived?: number;
-    createdAt: string;
+    createdAt?: string;
+    claimedAt?: string;
     user?: { nickname: string };
 };

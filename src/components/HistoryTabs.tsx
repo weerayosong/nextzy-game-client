@@ -58,20 +58,30 @@ export default function HistoryTabs() {
                     // *** ตรงนี้อาจจะต้องปรับการ map ข้อมูลให้ตรงกับ Schema ของ NestJS ***
 
                     const formattedData = result.data.map(
-                        (item: HistoryResponseItem) => ({
-                            id: item.id,
-                            description:
-                                activeTab === "REWARD"
-                                    ? `รับรางวัล Checkpoint ${item.checkpoint}`
-                                    : activeTab === "PERSONAL"
-                                      ? user?.nickname || "ผู้เล่นไม่ทราบชื่อ"
-                                      : item.user?.nickname ||
-                                        "ผู้เล่นไม่ทราบชื่อ",
-                            subtext:
-                                activeTab === "REWARD"
-                                    ? `รับเมื่อ ${new Date(item.createdAt).toLocaleString("th-TH")}`
-                                    : `รางวัล: ${item.pointsReceived?.toLocaleString() || 0} | เล่นเมื่อ ${new Date(item.createdAt).toLocaleString("th-TH")}`,
-                        }),
+                        (item: HistoryResponseItem) => {
+                            // ✅ ดึงวันที่จากฟิลด์ที่มีค่า (ถ้าเป็นรางวัลจะเป็น claimedAt, ถ้าหมุนวงล้อจะเป็น createdAt)
+                            const dateString =
+                                item.createdAt || item.claimedAt || "";
+                            const dateDisplay = dateString
+                                ? new Date(dateString).toLocaleString("th-TH")
+                                : "ไม่ทราบวันที่";
+
+                            return {
+                                id: item.id,
+                                description:
+                                    activeTab === "REWARD"
+                                        ? `รับรางวัล Checkpoint ${item.checkpoint}`
+                                        : activeTab === "PERSONAL"
+                                          ? user?.nickname ||
+                                            "ผู้เล่นไม่ทราบชื่อ"
+                                          : item.user?.nickname ||
+                                            "ผู้เล่นไม่ทราบชื่อ",
+                                subtext:
+                                    activeTab === "REWARD"
+                                        ? `รับเมื่อ ${dateDisplay}`
+                                        : `รางวัล: ${item.pointsReceived?.toLocaleString() || 0} | เล่นเมื่อ ${dateDisplay}`,
+                            };
+                        },
                     );
 
                     setHistoryData(formattedData);

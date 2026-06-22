@@ -20,7 +20,7 @@ export default function GameResultModal({
             }`}
         >
             <div
-                className={`bg-white rounded-sm w-85 pt-8 pb-6 px-6 relative text-center shadow-2xl transition-transform duration-300 border border-gray-100 ${
+                className={`bg-white rounded-3xl w-85 pt-8 pb-6 px-6 relative text-center shadow-2xl transition-transform duration-300 border border-gray-100 ${
                     isOpen ? "scale-100" : "scale-95"
                 }`}
             >
