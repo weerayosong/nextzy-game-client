@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { GameProvider } from "@/contexts/GameContext";
 import RouteGuard from "@/components/RouteGuard";
+import { Toaster } from "react-hot-toast";
 
 const kanit = Kanit({
     subsets: ["latin", "thai"],
@@ -32,6 +33,8 @@ export default function RootLayout({
                         <RouteGuard>{children}</RouteGuard>
                     </div>
                 </GameProvider>
+
+                <Toaster position="top-center" reverseOrder={false} />
             </body>
         </html>
     );

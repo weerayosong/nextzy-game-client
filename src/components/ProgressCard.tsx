@@ -5,6 +5,7 @@ import { FaCheck, FaCrown } from "react-icons/fa6";
 import { useState, useEffect } from "react";
 import RewardModal from "./RewardModal";
 import { rewardService } from "@/services/rewardService";
+import toast from "react-hot-toast";
 
 export default function ProgressCard() {
     const { user, logout } = useGame();
@@ -66,12 +67,13 @@ export default function ProgressCard() {
             setClaimedRewards((prev) => [...prev, checkpoint]);
             setRewardName(label);
             setIsModalOpen(true);
+            toast.success("รับรางวัลสำเร็จ!");
         } catch (error) {
             console.error(error);
             if (error instanceof Error) {
-                alert(error.message);
+                toast.error(error.message);
             } else {
-                alert("เกิดข้อผิดพลาดบางอย่าง กรุณาลองใหม่อีกครั้ง");
+                toast.error("เกิดข้อผิดพลาดบางอย่าง กรุณาลองใหม่อีกครั้ง");
             }
         } finally {
             setIsLoading(false);
