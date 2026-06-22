@@ -59,7 +59,9 @@ export default function HistoryTabs() {
 
                     const formattedData = result.data.map(
                         (item: HistoryResponseItem) => {
-                            // ✅ ดึงวันที่จากฟิลด์ที่มีค่า (ถ้าเป็นรางวัลจะเป็น claimedAt, ถ้าหมุนวงล้อจะเป็น createdAt)
+                            // ดึงวันที่ จากฟิลด์ที่มีค่า
+                            // ถ้าเป็นรางวัลจะเป็น claimedAt
+                            // ถ้าหมุนวงล้อจะเป็น createdAt
                             const dateString =
                                 item.createdAt || item.claimedAt || "";
                             const dateDisplay = dateString

@@ -7,6 +7,7 @@ type GameContextType = {
     user: User | null;
     setUser: (user: User | null) => void;
     updatePoints: (newTotal: number) => void;
+    logout: () => void;
 };
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -43,9 +44,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const logout = () => {
+        // ล้าง State
+        setUser(null);
+        // ล้าง LocalStorage
+        localStorage.removeItem("nextzy_user");
+        // เด้งกลับไปหน้าแรก (หน้า Login)
+        window.location.href = "/";
+    };
+
     return (
         <GameContext.Provider
-            value={{ user, setUser: handleSetUser, updatePoints }}
+            value={{ user, setUser: handleSetUser, updatePoints, logout }}
         >
             {children}
         </GameContext.Provider>

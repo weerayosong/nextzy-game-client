@@ -7,7 +7,7 @@ import RewardModal from "./RewardModal";
 import { rewardService } from "@/services/rewardService";
 
 export default function ProgressCard() {
-    const { user } = useGame();
+    const { user, logout } = useGame();
     const points = user?.totalPoints || 0;
 
     // State สำหรับจัดการการกดรับรางวัล
@@ -89,9 +89,17 @@ export default function ProgressCard() {
         <>
             <div className="bg-brand-gray-light pt-4 pb-4 px-4 shrink-0">
                 <div className="bg-white rounded-3xl border border-gray-300 pt-0.5 px-4 pb-5 relative shadow-sm">
-                    {/* ชื่อ-นามสกุล */}
-                    <div className="w-full text-center text-[#d1d5db] text-xs font-light tracking-wide mb-1 mt-1">
-                        {user?.nickname || "กำลังโหลด..."}
+                    {/* ชื่อผู้เล่น และ ปุ่มออกจากระบบ */}
+                    <div className="flex justify-center items-center gap-3 pt-2 relative z-10">
+                        <div className="text-gray-400 text-sm font-medium">
+                            {user?.nickname}
+                        </div>
+                        <button
+                            onClick={logout}
+                            className="text-[11px] text-gray-400 hover:text-red-500 underline transition-colors"
+                        >
+                            ออกจากระบบ
+                        </button>
                     </div>
 
                     {/* ปุ่มแชร์คะแนน */}
