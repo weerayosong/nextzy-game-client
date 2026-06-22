@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useGame } from "@/contexts/GameContext";
 import { TabType, HistoryResponseItem } from "@/types";
+import { historyService } from "@/services/historyService";
+import { rewardService } from "@/services/rewardService";
 
 type HistoryItem = {
     id: string;
@@ -27,25 +29,31 @@ export default function HistoryTabs() {
         const fetchHistory = async () => {
             setIsLoading(true);
             try {
-                let endpoint = "";
+                let result;
 
-                // กำหนด Endpoint ตามแท็บที่เลือก
+                // ใช้service ตามแท็บที่เลือก
                 if (activeTab === "GLOBAL") {
-                    endpoint = `/history/global?page=${currentPage}&limit=${itemsPerPage}`;
+                    result = await historyService.getGlobalHistory(
+                        currentPage,
+                        itemsPerPage,
+                    );
                 } else if (activeTab === "PERSONAL") {
-                    if (!user) return; // ถ้าไม่ได้ล็อกอิน ไม่ต้องดึงประวัติส่วนตัว
-                    endpoint = `/history/personal/${user.id}?page=${currentPage}&limit=${itemsPerPage}`;
+                    if (!user) return;
+                    result = await historyService.getPersonalHistory(
+                        user.id,
+                        currentPage,
+                        itemsPerPage,
+                    );
                 } else if (activeTab === "REWARD") {
                     if (!user) return;
-                    endpoint = `/reward/history/${user.id}?page=${currentPage}&limit=${itemsPerPage}`;
+                    result = await rewardService.getRewardHistory(
+                        user.id,
+                        currentPage,
+                        itemsPerPage,
+                    );
                 }
 
-                const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`,
-                );
-
-                if (res.ok) {
-                    const result = await res.json();
+                if (result && result.data) {
                     // สมมติว่า API ตอบกลับมาในรูปแบบ { data: [...], meta: { totalPages: X } }
                     // *** ตรงนี้อาจจะต้องปรับการ map ข้อมูลให้ตรงกับ Schema ของ NestJS ***
 

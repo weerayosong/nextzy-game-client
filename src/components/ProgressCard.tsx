@@ -4,6 +4,7 @@ import { useGame } from "@/contexts/GameContext";
 import { FaCheck, FaCrown } from "react-icons/fa6";
 import { useState, useEffect } from "react";
 import RewardModal from "./RewardModal";
+import { rewardService } from "@/services/rewardService";
 
 export default function ProgressCard() {
     const { user } = useGame();
@@ -19,23 +20,21 @@ export default function ProgressCard() {
         const fetchClaimedRewards = async () => {
             if (!user) return;
             try {
-                // ยิง API ไปเช็คประวัติรับรางวัล
-                const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/reward/history/${user.id}`,
+                // ดึงมา 50 รายการเลยเพื่อให้ครอบคลุมทุก checkpoint ที่เคยรับ
+                const data = await rewardService.getRewardHistory(
+                    user.id,
+                    1,
+                    50,
                 );
-                if (res.ok) {
-                    const data = await res.json();
+                // สมมติว่า NestJS ตอบกลับมาเป็น Array ของประวัติที่มีฟิลด์ checkpoint
+                // เราจะดึงมาเฉพาะตัวเลข checkpoint เพื่อเอาไปอัปเดต State
+                // (เช่น ถ้าได้ของ NestJS มาแบบมี Pagination เราอาจจะต้องเข้าถึง result.data.map แทน)
+                const items = data.data ? data.data : data;
+                const claimedCheckpoints = items.map(
+                    (item: { checkpoint: number }) => item.checkpoint,
+                );
 
-                    // สมมติว่า NestJS ตอบกลับมาเป็น Array ของประวัติที่มีฟิลด์ checkpoint
-                    // เราจะดึงมาเฉพาะตัวเลข checkpoint เพื่อเอาไปอัปเดต State
-                    // (เช่น ถ้าได้ของ NestJS มาแบบมี Pagination เราอาจจะต้องเข้าถึง result.data.map แทน)
-                    const items = data.data ? data.data : data;
-                    const claimedCheckpoints = items.map(
-                        (item: { checkpoint: number }) => item.checkpoint,
-                    );
-
-                    setClaimedRewards(claimedCheckpoints);
-                }
+                setClaimedRewards(claimedCheckpoints);
             } catch (error) {
                 console.error("Failed to fetch claimed rewards:", error);
             }
@@ -62,22 +61,7 @@ export default function ProgressCard() {
         setIsLoading(true);
 
         try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/reward/claim`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ userId: user.id, checkpoint }),
-                },
-            );
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(
-                    errorData.message || "เกิดข้อผิดพลาดในการรับรางวัล",
-                );
-            }
-
+            await rewardService.claimReward(user.id, checkpoint);
             // เมื่อรับสำเร็จ: อัปเดตสถานะปุ่ม + เปิด Modal โชว์ความสำเร็จ
             setClaimedRewards((prev) => [...prev, checkpoint]);
             setRewardName(label);
