@@ -10,7 +10,7 @@ export default function HistoryTabs() {
     return (
         <div className="flex-1 bg-white flex flex-col overflow-hidden relative">
             {/* ส่วนหัว (ปุ่มเปลี่ยน Tab) */}
-            <div className="grid grid-cols-3 px-3 py-4 gap-1 shrink-0 bg-white border-b border-gray-50">
+            <div className="grid grid-cols-3 px-6 py-4 gap-2 shrink-0 bg-white border-b border-gray-50">
                 <button
                     onClick={() => setActiveTab("tab1")}
                     className={`px-1 py-1.5 rounded-full border text-[10px] font-medium text-center tracking-tighter whitespace-nowrap transition-colors ${activeTab === "tab1" ? "border-brand-red text-brand-red" : "border-gray-400 text-gray-500"}`}
