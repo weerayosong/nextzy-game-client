@@ -1,9 +1,59 @@
-export default function Home() {
+/* eslint-disable */
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function LandingPage() {
+    const [nickname, setNickname] = useState("");
+    const router = useRouter();
+
+    const handleLogin = () => {
+        if (!nickname.trim()) {
+            alert("กรุณากรอกชื่อสำหรับเล่นก่อนครับ");
+            return;
+        }
+
+        console.log("กำลังเข้าสู่ระบบด้วยชื่อ:", nickname);
+        // router.push("/home");
+    };
+
     return (
-        <main className="flex min-h-screen items-center justify-center bg-slate-900">
-            <h1 className="text-4xl font-bold text-emerald-400">
-                Nextzy Gamification is Ready!
-            </h1>
+        // ใช้ flex-1 เพื่อยืดเนื้อหาให้เต็มพื้นที่ของ Layout หลัก
+        <main className="flex flex-col flex-1">
+            {/* ส่วนเนื้อหา (ให้อยู่ตรงกลางหน้าจอ) */}
+            <div className="flex-1 flex flex-col justify-center px-6 -mt-16 sm:-mt-20">
+                <h1 className="text-[28px] sm:text-3xl font-medium leading-tight text-black tracking-tight">
+                    Nextzy Test (Full Stack)
+                </h1>
+                <p className="text-brand-gray text-sm sm:text-base mt-1">
+                    เกมสะสมคะแนน
+                </p>
+
+                <div className="mt-12 sm:mt-16">
+                    <label className="block text-brand-gray text-xs sm:text-sm mb-2">
+                        ชื่อสำหรับเล่น (Nickname)
+                    </label>
+                    <input
+                        type="text"
+                        value={nickname}
+                        onChange={(e) => setNickname(e.target.value)}
+                        placeholder="Test 234"
+                        className="w-full h-12 sm:h-13.5 px-4 border border-gray-300 rounded-lg text-black text-base focus:outline-none focus:border-[#FBBF24] focus:ring-1 focus:ring-[#FBBF24] transition-all"
+                        onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                    />
+                </div>
+            </div>
+
+            {/* ส่วนปุ่ม (ดันลงล่างสุดเสมอ) */}
+            <div className="px-6 pb-8 sm:pb-12">
+                <button
+                    onClick={handleLogin}
+                    className="w-full h-12 sm:h-13.5 bg-[#FFC107] hover:bg-[#F5B000] active:scale-[0.98] text-white font-bold text-lg rounded-full transition-all flex items-center justify-center"
+                >
+                    เข้าเล่น
+                </button>
+            </div>
         </main>
     );
 }

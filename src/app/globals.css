@@ -1,1 +1,11 @@
 @import "tailwindcss";
+
+@theme {
+    --color-brand-yellow: #ffc107;
+    --color-brand-yellow-hover: #f5b000;
+    --color-brand-gray: #979797;
+}
+
+body {
+    background-color: #f3f4f6;
+}

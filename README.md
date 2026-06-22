@@ -1,12 +1,12 @@
-# Nextzy Gamification - Frontend (Client)
+# [WIP] Nextzy Gamification - Frontend (Client)
 
-ระบบส่วนหน้า (Frontend) สำหรับโปรเจกต์ Nextzy Gamification พัฒนาด้วย Next.js และ Tailwind CSS โดยเน้นความเรียบง่ายและประสิทธิภาพสูงสุด
+ระบบส่วนหน้าบ้าน (Frontend) สำหรับโปรเจกต์ Nextzy Gamification พัฒนาด้วย Next.js และ Tailwind CSS โดยเน้นความเรียบง่ายและประสิทธิภาพสูงสุด
 
 Repository ฝั่ง Backend (NestJS): [Link to Backend Repository](https://github.com/weerayosong/nextzy-game-server)
 
 ## การออกแบบระบบและสถาปัตยกรรม (System Design & Software Architecture)
 
-[Link to Documentation](https://subtle-pastelito-35134b.netlify.app)
+[Link to Documentation](https://incandescent-crumble-d59b5c.netlify.app)
 
 โปรเจกต์นี้ยึดหลัก Clean Architecture และ Minimalist Approach:
 
@@ -52,7 +52,7 @@ cp .env.example .env.local
 
 ```
 
-_(กำหนดค่า `NEXT_PUBLIC_API_URL` ให้ชี้ไปยัง Backend URL เช่น `http://localhost:3000`)_
+_(กำหนดค่า `NEXT_PUBLIC_API_URL` ให้ชี้ไปยัง Backend URL เช่น `http://localhost:3001`)_
 
 4. รันโปรเจกต์ในโหมด Development
 
