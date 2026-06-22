@@ -2,7 +2,7 @@
 
 import { useGame } from "@/contexts/GameContext";
 import { FaCheck, FaCrown } from "react-icons/fa6";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RewardModal from "./RewardModal";
 
 export default function ProgressCard() {
@@ -14,6 +14,35 @@ export default function ProgressCard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [rewardName, setRewardName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchClaimedRewards = async () => {
+            if (!user) return;
+            try {
+                // ยิง API ไปเช็คประวัติรับรางวัล
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/reward/history/${user.id}`,
+                );
+                if (res.ok) {
+                    const data = await res.json();
+
+                    // สมมติว่า NestJS ตอบกลับมาเป็น Array ของประวัติที่มีฟิลด์ checkpoint
+                    // เราจะดึงมาเฉพาะตัวเลข checkpoint เพื่อเอาไปอัปเดต State
+                    // (เช่น ถ้าได้ของ NestJS มาแบบมี Pagination เราอาจจะต้องเข้าถึง result.data.map แทน)
+                    const items = data.data ? data.data : data;
+                    const claimedCheckpoints = items.map(
+                        (item: { checkpoint: number }) => item.checkpoint,
+                    );
+
+                    setClaimedRewards(claimedCheckpoints);
+                }
+            } catch (error) {
+                console.error("Failed to fetch claimed rewards:", error);
+            }
+        };
+
+        fetchClaimedRewards();
+    }, [user]);
 
     // คำนวณความกว้างหลอดตามตำแหน่ง Visual (15%, 40%, 100%)
     let visualPercent = 0;

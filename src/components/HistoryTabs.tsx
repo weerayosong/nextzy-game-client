@@ -1,92 +1,197 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useGame } from "@/contexts/GameContext";
+
+// กำหนด Type ชั่วคราว (เดี๋ยวค่อยย้ายไปโฟลเดอร์ types ตอน Refactor)
+type TabType = "GLOBAL" | "PERSONAL" | "REWARD";
+
+type HistoryItem = {
+    id: string;
+    description: string; // เช่น "Test 24xxxxx", "คุณได้รับรางวัล 1"
+    subtext: string; // เช่น "รางวัล: 1,000 | เล่นเมื่อ 15/02/25 20:00 น."
+};
 
 export default function HistoryTabs() {
-    const [activeTab, setActiveTab] = useState<"tab1" | "tab2" | "tab3">(
-        "tab1",
-    );
+    const { user } = useGame();
+
+    // States สำหรับ UI และ Pagination
+    const [activeTab, setActiveTab] = useState<TabType>("GLOBAL");
+    const [historyData, setHistoryData] = useState<HistoryItem[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const itemsPerPage = 5;
+
+    // ฟังก์ชันดึงข้อมูลตาม Tab และ Page ปัจจุบัน
+    useEffect(() => {
+        const fetchHistory = async () => {
+            setIsLoading(true);
+            try {
+                let endpoint = "";
+
+                // กำหนด Endpoint ตามแท็บที่เลือก
+                if (activeTab === "GLOBAL") {
+                    endpoint = `/history/global?page=${currentPage}&limit=${itemsPerPage}`;
+                } else if (activeTab === "PERSONAL") {
+                    if (!user) return; // ถ้าไม่ได้ล็อกอิน ไม่ต้องดึงประวัติส่วนตัว
+                    endpoint = `/history/personal/${user.id}?page=${currentPage}&limit=${itemsPerPage}`;
+                } else if (activeTab === "REWARD") {
+                    if (!user) return;
+                    endpoint = `/reward/history/${user.id}?page=${currentPage}&limit=${itemsPerPage}`;
+                }
+
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`,
+                );
+
+                if (res.ok) {
+                    const result = await res.json();
+                    // สมมติว่า API ตอบกลับมาในรูปแบบ { data: [...], meta: { totalPages: X } }
+                    // *** ตรงนี้อาจจะต้องปรับการ map ข้อมูลให้ตรงกับ Schema ของ NestJS ***
+
+                    const formattedData = result.data.map(
+                        (item: {
+                            id: string;
+                            checkpoint?: number;
+                            pointsReceived?: number;
+                            createdAt: string;
+                            user?: { nickname: string };
+                        }) => ({
+                            id: item.id,
+                            description:
+                                activeTab === "REWARD"
+                                    ? `รับรางวัล Checkpoint ${item.checkpoint}`
+                                    : activeTab === "PERSONAL"
+                                      ? user?.nickname || "ผู้เล่นไม่ทราบชื่อ"
+                                      : item.user?.nickname ||
+                                        "ผู้เล่นไม่ทราบชื่อ",
+                            subtext:
+                                activeTab === "REWARD"
+                                    ? `รับเมื่อ ${new Date(item.createdAt).toLocaleString("th-TH")}`
+                                    : `รางวัล: ${item.pointsReceived?.toLocaleString() || 0} | เล่นเมื่อ ${new Date(item.createdAt).toLocaleString("th-TH")}`,
+                        }),
+                    );
+
+                    setHistoryData(formattedData);
+                    setTotalPages(result.meta?.totalPages || 1);
+                } else {
+                    setHistoryData([]);
+                    setTotalPages(1);
+                }
+            } catch (error) {
+                console.error("Failed to fetch history:", error);
+                setHistoryData([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchHistory();
+    }, [activeTab, currentPage, user]);
+
+    // เมื่อเปลี่ยน Tab ให้รีเซ็ตกลับไปหน้า 1 เสมอ
+    const handleTabChange = (tab: TabType) => {
+        setActiveTab(tab);
+        setCurrentPage(1);
+    };
 
     return (
-        <div className="flex-1 bg-white flex flex-col overflow-hidden relative">
-            {/* ส่วนหัว (ปุ่มเปลี่ยน Tab) */}
-            <div className="grid grid-cols-3 px-6 py-4 gap-2 shrink-0 bg-white border-b border-gray-50">
+        <div className="w-full bg-white mt-4">
+            {/* เมนู Tabs */}
+            <div className="flex justify-around items-center border-b border-gray-200 px-4 pt-4 pb-2">
                 <button
-                    onClick={() => setActiveTab("tab1")}
-                    className={`px-1 py-1.5 rounded-full border text-[10px] font-medium text-center tracking-tighter whitespace-nowrap transition-colors ${activeTab === "tab1" ? "border-brand-red text-brand-red" : "border-gray-400 text-gray-500"}`}
+                    onClick={() => handleTabChange("GLOBAL")}
+                    className={`text-[13px] font-medium px-4 py-2 rounded-full transition-all border ${
+                        activeTab === "GLOBAL"
+                            ? "border-brand-red text-brand-red"
+                            : "border-gray-300 text-gray-500 hover:bg-gray-50"
+                    }`}
                 >
                     ประวัติทั่วโลก
                 </button>
                 <button
-                    onClick={() => setActiveTab("tab2")}
-                    className={`px-1 py-1.5 rounded-full border text-[10px] font-medium text-center tracking-tighter whitespace-nowrap transition-colors ${activeTab === "tab2" ? "border-brand-red text-brand-red" : "border-gray-400 text-gray-500"}`}
+                    onClick={() => handleTabChange("PERSONAL")}
+                    className={`text-[13px] font-medium px-4 py-2 rounded-full transition-all border ${
+                        activeTab === "PERSONAL"
+                            ? "border-brand-red text-brand-red"
+                            : "border-gray-300 text-gray-500 hover:bg-gray-50"
+                    }`}
                 >
                     ประวัติของฉัน
                 </button>
                 <button
-                    onClick={() => setActiveTab("tab3")}
-                    className={`px-1 py-1.5 rounded-full border text-[10px] font-medium text-center tracking-tighter whitespace-nowrap transition-colors ${activeTab === "tab3" ? "border-brand-red text-brand-red" : "border-gray-400 text-gray-500"}`}
+                    onClick={() => handleTabChange("REWARD")}
+                    className={`text-[13px] font-medium px-4 py-2 rounded-full transition-all border ${
+                        activeTab === "REWARD"
+                            ? "border-brand-red text-brand-red"
+                            : "border-gray-300 text-gray-500 hover:bg-gray-50"
+                    }`}
                 >
                     ประวัติรางวัลของฉัน
                 </button>
             </div>
 
-            {/* ส่วนแสดงข้อมูลด้านล่าง จำลองข้อมูลรอ api */}
-            <div className="flex-1 overflow-y-auto no-scrollbar pb-24 relative">
-                {activeTab === "tab1" && (
-                    <div className="flex flex-col">
-                        {[1, 2, 3, 4].map((item) => (
+            {/* รายการข้อมูล */}
+            <div className="min-h-75">
+                {isLoading ? (
+                    <div className="flex justify-center items-center h-50 text-gray-400 text-sm">
+                        กำลังโหลดข้อมูล...
+                    </div>
+                ) : historyData.length === 0 ? (
+                    <div className="flex justify-center items-center h-50 text-gray-400 text-sm">
+                        ไม่มีข้อมูลประวัติ
+                    </div>
+                ) : (
+                    <div className="divide-y divide-gray-100">
+                        {historyData.map((item) => (
                             <div
-                                key={`global-${item}`}
-                                className="flex items-center px-4 py-3 border-b border-gray-100"
+                                key={item.id}
+                                className="py-4 px-6 text-center"
                             >
-                                <div className="w-12.5 h-12.5 rounded-full bg-brand-orange-avatar shrink-0 mr-4"></div>
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-gray-800 text-[15px]">
-                                        Test 24xxxxx
-                                    </span>
-                                    <span className="text-[11px] text-gray-400">
-                                        รางวัล: 1,000 | เล่นเมื่อ 15/02/25 20:00
-                                        น.
-                                    </span>
+                                <div className="font-bold text-gray-800 text-[15px] mb-1">
+                                    {item.description}
+                                </div>
+                                <div className="text-gray-400 text-[12px] font-light">
+                                    {item.subtext}
                                 </div>
                             </div>
                         ))}
                     </div>
                 )}
-
-                {activeTab === "tab2" && (
-                    <div className="flex flex-col">
-                        <div className="flex items-center px-4 py-3 border-b border-gray-100">
-                            <div className="w-12.5 h-12.5 rounded-full bg-[#ff7b5a] shrink-0 mr-4"></div>
-                            <div className="flex flex-col">
-                                <span className="font-bold text-gray-800 text-[15px]">
-                                    Test 24xxxxx
-                                </span>
-                                <span className="text-[11px] text-gray-400">
-                                    รางวัล: 1,000 | เล่นเมื่อ 15/02/25 20:00 น.
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {activeTab === "tab3" && (
-                    <div className="flex flex-col">
-                        <div className="flex items-center px-4 py-3 border-b border-gray-100">
-                            <div className="w-12.5 h-12.5 rounded-full bg-brand-orange-avatar shrink-0 mr-4"></div>
-                            <div className="flex flex-col">
-                                <span className="font-bold text-gray-800 text-[15px]">
-                                    ได้รับรางวัล 1
-                                </span>
-                                <span className="text-[11px] text-gray-400">
-                                    ได้รับเมื่อ 15/02/25 20:00 น.
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
+
+            {/* Pagination Controls */}
+            {!isLoading && totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 py-6 border-t border-gray-100">
+                    <button
+                        onClick={() =>
+                            setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        disabled={currentPage === 1}
+                        className="text-sm px-4 py-1.5 rounded-md border border-gray-300 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    >
+                        ก่อนหน้า
+                    </button>
+
+                    <span className="text-sm text-gray-500">
+                        หน้า {currentPage} จาก {totalPages}
+                    </span>
+
+                    <button
+                        onClick={() =>
+                            setCurrentPage((prev) =>
+                                Math.min(prev + 1, totalPages),
+                            )
+                        }
+                        disabled={currentPage === totalPages}
+                        className="text-sm px-4 py-1.5 rounded-md border border-gray-300 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    >
+                        ถัดไป
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
