@@ -29,7 +29,7 @@ export default function RootLayout({
             >
                 <GameProvider>
                     {/* mainContainer mobile-100%, desktop-center */}
-                    <div className="w-full max-w-md mx-auto min-h-dvh bg-white shadow-2xl relative overflow-x-hidden flex flex-col">
+                    <div className="w-full max-w-md mx-auto h-dvh bg-white shadow-2xl relative overflow-hidden flex flex-col">
                         <RouteGuard>{children}</RouteGuard>
                     </div>
                 </GameProvider>

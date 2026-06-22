@@ -110,7 +110,7 @@ export default function HistoryTabs() {
     };
 
     return (
-        <div className="w-full bg-white mt-4">
+        <div className="w-full bg-white mt-1 flex flex-col flex-1 min-h-0 mb-20 rounded-b-xl">
             {/* เมนู Tabs */}
             <div className="flex justify-around items-center border-b border-gray-200 px-4 pt-4 pb-2">
                 <button
@@ -146,7 +146,7 @@ export default function HistoryTabs() {
             </div>
 
             {/* รายการข้อมูล */}
-            <div className="min-h-75">
+            <div className="flex-1 overflow-y-auto no-scrollbar">
                 {isLoading ? (
                     <div className="flex justify-center items-center h-50 text-gray-400 text-sm">
                         กำลังโหลดข้อมูล...
@@ -181,7 +181,7 @@ export default function HistoryTabs() {
 
             {/* Pagination Controls */}
             {!isLoading && totalPages > 1 && (
-                <div className="flex justify-center items-center gap-4 py-6 border-t border-gray-100">
+                <div className="flex justify-center items-center gap-4 py-4 border-t border-gray-100 bg-white mt-auto">
                     <button
                         onClick={() =>
                             setCurrentPage((prev) => Math.max(prev - 1, 1))
