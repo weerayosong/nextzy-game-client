@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Kanit } from "next/font/google";
 import "./globals.css";
 
+import { GameProvider } from "@/contexts/GameContext";
+
 const kanit = Kanit({
     subsets: ["latin", "thai"],
     weight: ["300", "400", "500", "600", "700"],
@@ -23,10 +25,12 @@ export default function RootLayout({
             <body
                 className={`${kanit.className} bg-gray-100 text-black antialiased`}
             >
-                {/* mainContainer mobile-100%, desktop-center */}
-                <div className="w-full max-w-md mx-auto min-h-dvh bg-white shadow-2xl relative overflow-x-hidden flex flex-col">
-                    {children}
-                </div>
+                <GameProvider>
+                    {/* mainContainer mobile-100%, desktop-center */}
+                    <div className="w-full max-w-md mx-auto min-h-dvh bg-white shadow-2xl relative overflow-x-hidden flex flex-col">
+                        {children}
+                    </div>
+                </GameProvider>
             </body>
         </html>
     );

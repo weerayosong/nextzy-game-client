@@ -4,18 +4,51 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useGame } from "@/contexts/GameContext";
+
 export default function LandingPage() {
     const [nickname, setNickname] = useState("");
+    const [isLoading, setIsLoading] = useState(false); // เพิ่ม state สำหรับปุม loading
     const router = useRouter();
+    const { setUser } = useGame(); // เรียกใช้ Context
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         if (!nickname.trim()) {
             alert("กรุณากรอกชื่อสำหรับเล่นก่อนครับ");
             return;
         }
 
-        console.log("กำลังเข้าสู่ระบบด้วยชื่อ:", nickname);
-        // router.push("/home");
+        setIsLoading(true);
+        try {
+            // ยิง API ไปหาหลังบ้าน
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nickname: nickname.trim() }),
+                },
+            );
+
+            if (!res.ok) throw new Error("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+
+            const userData = await res.json();
+
+            // บันทึกข้อมูลลง Global State
+            setUser({
+                id: userData.id,
+                nickname: userData.nickname,
+                totalPoints: userData.totalPoints,
+            });
+
+            // ล็อกอินสำเร็จ พาไปหน้า /home
+            router.push("/home");
+        } catch (error) {
+            console.error(error);
+            alert("เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่อีกครั้ง");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
