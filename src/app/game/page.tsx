@@ -49,7 +49,7 @@ export default function GamePage() {
     };
 
     // จัดการการคลิกปุ่มหมุน/หยุด
-    const handleSpinClick = () => {
+    const handleSpinClick = async () => {
         if (spinState === "IDLE") {
             // 1. สถานะ: เริ่มหมุน
             setSpinState("SPINNING");
@@ -58,29 +58,58 @@ export default function GamePage() {
         } else if (spinState === "SPINNING") {
             // 2. สถานะ: กดหยุด
             setSpinState("STOPPED");
-            if (reqIdRef.current) cancelAnimationFrame(reqIdRef.current);
 
-            // สุ่มรางวัล (เดี๋ยวเปลี่ยน ยิง api ไปหา NestJS)
-            const prize = PRIZES[Math.floor(Math.random() * PRIZES.length)];
-            setPendingPrize(prize.value);
+            // สุ่มรางวัล (เปลี่ยนเป็น ยิง api ไปหา NestJS)
+            try {
+                // ยิง API ไปสุ่มคะแนนจากหลังบ้าน (ต้องแนบ userId ไปด้วย)
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/game/spin`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userId: user?.id }),
+                    },
+                );
 
-            const randomOffset = Math.floor(Math.random() * 60) - 30;
-            const baseTarget = Math.ceil(currentAngleRef.current / 360) * 360;
-            const extraSpins = 3 * 360;
-            const finalAngle =
-                baseTarget + extraSpins + prize.angle + randomOffset;
+                if (!res.ok) throw new Error("เกิดข้อผิดพลาดในการสุ่มรางวัล");
 
-            if (wheelRef.current) {
-                wheelRef.current.style.transition =
-                    "transform 3.5s cubic-bezier(0.15, 0.85, 0.3, 1)";
-                wheelRef.current.style.transform = `rotate(${finalAngle}deg)`;
+                const data = await res.json();
+                // data.rewardPoints คือคะแนนที่ได้จากหลังบ้านจริงๆ (300, 500, 1000, 3000)
+                const wonPoints = data.rewardPoints;
+                setPendingPrize(wonPoints);
+
+                // api ตอบกลับมาแล้ว! ถึงเวลาสั่งหยุดลูปหมุนรอบ
+                if (reqIdRef.current) cancelAnimationFrame(reqIdRef.current);
+
+                // หาว่าคะแนนที่ได้ ตรงกับ Index องศาไหนบนวงล้อ
+                const prizeConfig =
+                    PRIZES.find((p) => p.value === wonPoints) || PRIZES[0];
+
+                const randomOffset = Math.floor(Math.random() * 60) - 30;
+                const baseTarget =
+                    Math.ceil(currentAngleRef.current / 360) * 360;
+                const extraSpins = 3 * 360;
+
+                // คำนวณองศาจุดจบ
+                const finalAngle =
+                    baseTarget + extraSpins + prizeConfig.angle + randomOffset;
+
+                if (wheelRef.current) {
+                    wheelRef.current.style.transition =
+                        "transform 3.5s cubic-bezier(0.15, 0.85, 0.3, 1)";
+                    wheelRef.current.style.transform = `rotate(${finalAngle}deg)`;
+                }
+                currentAngleRef.current = finalAngle;
+
+                // รอ 3.6 วิ ให้วงล้อหยุดสนิท แล้วแสดง Modal
+                setTimeout(() => {
+                    setIsModalOpen(true);
+                }, 3600);
+            } catch (error) {
+                console.error(error);
+                alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
+                setSpinState("IDLE"); // ย้อนกลับไปให้กดใหม่
             }
-            currentAngleRef.current = finalAngle;
-
-            // รอ 3.6 วิ ให้วงล้อหยุดสนิท แล้วแสดง Modal
-            setTimeout(() => {
-                setIsModalOpen(true);
-            }, 3600);
         }
     };
 
