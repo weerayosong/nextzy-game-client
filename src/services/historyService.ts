@@ -6,7 +6,12 @@ export const historyService = {
         const res = await fetch(
             `${API_URL}/history/global?page=${page}&limit=${limit}`,
         );
-        if (!res.ok) throw new Error("Failed to fetch global history");
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(
+                errorData.message || "Failed to fetch global history",
+            );
+        }
         return res.json();
     },
 
@@ -19,7 +24,12 @@ export const historyService = {
         const res = await fetch(
             `${API_URL}/history/personal/${userId}?page=${page}&limit=${limit}`,
         );
-        if (!res.ok) throw new Error("Failed to fetch personal history");
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(
+                errorData.message || "Failed to fetch personal history",
+            );
+        }
         return res.json();
     },
 };

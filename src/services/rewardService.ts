@@ -27,7 +27,12 @@ export const rewardService = {
         const res = await fetch(
             `${API_URL}/reward/history/${userId}?page=${page}&limit=${limit}`,
         );
-        if (!res.ok) throw new Error("Failed to fetch reward history");
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(
+                errorData.message || "Failed to fetch reward history",
+            );
+        }
         return res.json();
     },
 };

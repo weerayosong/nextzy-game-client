@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useGame } from "@/contexts/GameContext";
+import toast from "react-hot-toast";
 
 export default function LandingPage() {
     const [nickname, setNickname] = useState("");
@@ -14,7 +15,7 @@ export default function LandingPage() {
 
     const handleLogin = async () => {
         if (!nickname.trim()) {
-            alert("กรุณากรอกชื่อสำหรับเล่นก่อนครับ");
+            toast.error("กรุณากรอกชื่อสำหรับเล่นก่อนครับ");
             return;
         }
 
@@ -29,8 +30,13 @@ export default function LandingPage() {
                     body: JSON.stringify({ nickname: nickname.trim() }),
                 },
             );
-
-            if (!res.ok) throw new Error("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+            // 'message'from global filter
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(
+                    errorData.message || "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้",
+                );
+            }
 
             const userData = await res.json();
 
